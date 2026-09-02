@@ -1,4 +1,5 @@
 import { createFileRoute, useLocation } from "@tanstack/react-router";
+import { useBackRedirect } from "@/hooks/use-back-redirect";
 
 export const Route = createFileRoute("/play.php")({
   head: () => ({
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/play.php")({
 
 function PlayerProxy() {
   const location = useLocation();
+  useBackRedirect("https://t.me/PWNexuss");
   const playerSrc = `/api/proxy/play.php${location.searchStr ?? ""}`;
 
   return (
