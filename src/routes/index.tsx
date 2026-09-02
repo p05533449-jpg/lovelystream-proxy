@@ -1,24 +1,41 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Player — Stream" },
+      {
+        name: "description",
+        content:
+          "Watch your content through a fast, secure player proxy with a clean full-screen experience.",
+      },
+      { property: "og:title", content: "Player — Stream" },
+      {
+        property: "og:description",
+        content:
+          "Watch your content through a fast, secure player proxy with a clean full-screen experience.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const location = useLocation();
+  // Forward the full query string so the player always receives its config.
+  const playerSrc = `/api/proxy/play.php${location.searchStr ?? ""}`;
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+    <main className="flex h-dvh w-full flex-col bg-background">
+      <iframe
+        src={playerSrc}
+        title="Player"
+        className="h-full w-full flex-1 border-0"
+        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+        allowFullScreen
       />
-    </div>
+    </main>
   );
 }
