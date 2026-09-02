@@ -1,11 +1,32 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
 
-// Visiting /play.php?... on this domain routes into the proxy,
-// preserving the full query string so the player receives its config.
 export const Route = createFileRoute("/play.php")({
-  beforeLoad: ({ location }) => {
-    throw redirect({
-      href: `/api/proxy/play.php${location.searchStr ?? ""}${location.hash ?? ""}`,
-    });
-  },
+  head: () => ({
+    meta: [
+      { title: "Player — Stream" },
+      { name: "description", content: "Watch your lecture in the full-screen player." },
+      { property: "og:title", content: "Player — Stream" },
+      { property: "og:description", content: "Watch your lecture in the full-screen player." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: PlayerProxy,
 });
+
+function PlayerProxy() {
+  const location = useLocation();
+  const playerSrc = `/api/proxy/play.php${location.searchStr ?? ""}`;
+
+  return (
+    <main className="flex h-dvh w-full bg-background">
+      <iframe
+        src={playerSrc}
+        title="Player"
+        className="h-full w-full border-0"
+        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+        allowFullScreen
+      />
+    </main>
+  );
+}
