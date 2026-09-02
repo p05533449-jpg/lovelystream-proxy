@@ -57,15 +57,7 @@ function rewriteHtml(html: string): string {
       `${attr}${quote}${PROXY_PREFIX}${path}${quote}`,
   );
 
-  // 4. Root-relative URLs inside inline scripts/config must also stay on the proxy.
-  // A <base> tag does not affect fetch("/api/...") or media URLs returned in JS.
-  out = out.replace(
-    /(["'`])\/(?!\/|api\/proxy\/)([^"'`\s<>]*)\1/g,
-    (_match, quote: string, path: string) =>
-      `${quote}${PROXY_PREFIX}${path}${quote}`,
-  );
-
-  // 5. Resolve genuinely relative assets through the proxy.
+  // 4. Relative URLs: inject a <base> so the browser resolves them through the proxy.
   if (/<head[^>]*>/i.test(out)) {
     out = out.replace(/<head([^>]*)>/i, `<head$1><base href="${PROXY_PREFIX}">`);
   }
@@ -78,19 +70,6 @@ function rewriteCss(css: string): string {
     /url\(\s*(["']?)\/(?!api\/proxy\/)([^)"']+)\1\s*\)/gi,
     (_m, quote: string, path: string) => `url(${quote}${PROXY_PREFIX}${path}${quote})`,
   );
-}
-
-function rewriteTextPayload(text: string): string {
-  return text
-    .replaceAll("t.me/official_marco_22", "t.me/PWNexuss")
-    .replaceAll("telegram.me/official_marco_22", "telegram.me/PWNexuss")
-    .replaceAll("@official_marco_22", "@PWNexuss")
-    .replaceAll(`${TARGET_ORIGIN}/`, PROXY_PREFIX)
-    .replace(
-      /(["'])\/(?!\/|api\/proxy\/)([^"'\s<>]*)\1/g,
-      (_match, quote: string, path: string) =>
-        `${quote}${PROXY_PREFIX}${path}${quote}`,
-    );
 }
 
 async function handleProxy(request: Request, splat: string): Promise<Response> {
@@ -166,19 +145,6 @@ async function handleProxy(request: Request, splat: string): Promise<Response> {
     const css = await upstream.text();
     responseHeaders.set("content-type", contentType);
     return new Response(rewriteCss(css), { status: upstream.status, headers: responseHeaders });
-  }
-
-  if (
-    contentType.includes("application/json") ||
-    contentType.includes("text/javascript") ||
-    contentType.includes("application/javascript")
-  ) {
-    const text = await upstream.text();
-    responseHeaders.set("content-type", contentType);
-    return new Response(rewriteTextPayload(text), {
-      status: upstream.status,
-      headers: responseHeaders,
-    });
   }
 
   return new Response(upstream.body, { status: upstream.status, headers: responseHeaders });
