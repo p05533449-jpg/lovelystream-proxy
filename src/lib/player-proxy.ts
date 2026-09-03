@@ -166,7 +166,7 @@ export async function handleProxy(request: Request, splat: string): Promise<Resp
   const incoming = new URL(request.url);
   const targetUrl = `${TARGET_ORIGIN}/${splat}${incoming.search}`;
   const isDocumentRequest =
-    request.method === "GET" && /(^|\/)[^/]*\.php$/i.test(splat.split("?")[0]);
+    request.method === "GET" && /(^|\/)[^/]*\.php$/i.test(splat.split("?")[0] ?? "");
   const cacheKey = targetUrl;
 
   if (isDocumentRequest) {
