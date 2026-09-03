@@ -1,6 +1,16 @@
 import { createFileRoute, useLocation } from "@tanstack/react-router";
 
+import { handleProxy } from "@/lib/player-proxy";
+
 export const Route = createFileRoute("/play.php")({
+  server: {
+    handlers: {
+      // Serve the player document directly: no iframe hop, no React shell to
+      // download/hydrate first, so the upstream player request starts on the
+      // very first byte of the navigation.
+      GET: async ({ request }) => handleProxy(request, "play.php"),
+    },
+  },
   head: () => ({
     meta: [
       { title: "Player — Stream" },
