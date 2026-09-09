@@ -28,7 +28,7 @@ function Index() {
   const playerSrc = `/api/proxy/play.php${location.searchStr ?? ""}`;
 
   return (
-    <main className="flex h-dvh w-full flex-col bg-background">
+    <main className="flex h-dvh w-full flex-col bg-black">
       <iframe
         src={playerSrc}
         title="Player"
