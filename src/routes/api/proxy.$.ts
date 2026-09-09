@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const TARGET_ORIGIN = "https://pwxmarco.pages.dev";
+import { renderAccessDeniedPage } from "@/lib/access-denied-page";
+import { evaluateRequest } from "@/lib/player-gateway";
+
+const TARGET_ORIGIN = "https://pwnexus-player.vercel.app";
 const PROXY_PREFIX = "/api/proxy/";
 
 // Headers we never forward to the origin
