@@ -19,7 +19,7 @@ function PlayerProxy() {
   const playerSrc = `/api/proxy/play.php${location.searchStr ?? ""}`;
 
   return (
-    <main className="flex h-dvh w-full bg-background">
+    <main className="flex h-dvh w-full bg-black">
       <iframe
         src={playerSrc}
         title="Player"
