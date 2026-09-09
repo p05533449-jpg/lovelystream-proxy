@@ -137,8 +137,18 @@
     border-color: var(--color-border);
   }
 
+  html {
+    color-scheme: dark;
+    background-color: #000;
+  }
+
   body {
-    background-color: var(--color-background);
+    background-color: #000;
     color: var(--color-foreground);
+    margin: 0;
+  }
+
+  iframe {
+    background-color: #000;
   }
 }
