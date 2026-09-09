@@ -88,7 +88,21 @@ function rewriteCss(css: string): string {
   );
 }
 
+function denyResponse(): Response {
+  return new Response(renderAccessDeniedPage(), {
+    status: 403,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store",
+      "x-robots-tag": "noindex",
+    },
+  });
+}
+
 async function handleProxy(request: Request, splat: string): Promise<Response> {
+  const verdict = evaluateRequest(request);
+  if (!verdict.allowed) return denyResponse();
+
   const incoming = new URL(request.url);
   const targetUrl = `${TARGET_ORIGIN}/${splat}${incoming.search}`;
 
