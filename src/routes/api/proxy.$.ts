@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const TARGET_ORIGIN = "https://pwxmarco.pages.dev";
+import { renderAccessDeniedPage } from "@/lib/access-denied-page";
+import { evaluateRequest } from "@/lib/player-gateway";
+
+const TARGET_ORIGIN = "https://pwnexus-player.vercel.app";
 const PROXY_PREFIX = "/api/proxy/";
 
 // Headers we never forward to the origin
@@ -70,8 +73,9 @@ function rewriteHtml(html: string): string {
       `${attr}${quote}${PROXY_PREFIX}${path}${quote}`,
   );
 
-  // 5. Relative URLs: inject a <base> so the browser resolves them through the proxy.
-  if (/<head[^>]*>/i.test(out)) {
+  // 5. Relative URLs: inject a <base> so the browser resolves them through the proxy
+  // (skip when the page already carries one — a second <base> is ignored anyway).
+  if (!/<base\s[^>]*href/i.test(out) && /<head[^>]*>/i.test(out)) {
     out = out.replace(/<head([^>]*)>/i, `<head$1><base href="${PROXY_PREFIX}">`);
   }
 
@@ -85,7 +89,21 @@ function rewriteCss(css: string): string {
   );
 }
 
+function denyResponse(): Response {
+  return new Response(renderAccessDeniedPage(), {
+    status: 403,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store",
+      "x-robots-tag": "noindex",
+    },
+  });
+}
+
 async function handleProxy(request: Request, splat: string): Promise<Response> {
+  const verdict = evaluateRequest(request);
+  if (!verdict.allowed) return denyResponse();
+
   const incoming = new URL(request.url);
   const targetUrl = `${TARGET_ORIGIN}/${splat}${incoming.search}`;
 
